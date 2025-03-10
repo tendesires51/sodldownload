@@ -60,4 +60,4 @@ def fix_metadata():
 if __name__ == "__main__":
     print("Fixing metadata and organizing files...")
     fix_metadata()
-input("\nTask completed! Press Enter to exit...")
+print("Task completed!")
