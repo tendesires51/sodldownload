@@ -3,3 +3,4 @@ mutagen
 tqdm
 pydub
 audioop-lts
+PyQt6
