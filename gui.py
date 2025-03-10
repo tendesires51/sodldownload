@@ -1,9 +1,8 @@
 import sys
 import os
-import subprocess
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFrame, QCheckBox
-from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFrame, QCheckBox, QTextEdit, QScrollBar
+from PyQt6.QtGui import QFont, QIcon
+from PyQt6.QtCore import Qt, QProcess
 
 # Default Base Directory
 BASE_DIR = "Disneyland_Audio"
@@ -11,15 +10,15 @@ BASE_DIR = "Disneyland_Audio"
 class AudioManagerGUI(QWidget):
     def __init__(self):
         super().__init__()
-
-        # Theme State (Dark Mode by Default)
-        self.is_dark_mode = True  
+        self.process = QProcess(self)  # Create process instance
+        self.is_dark_mode = True  # Theme State (Dark Mode by Default)
         self.initUI()
 
     def initUI(self):
         # Window Setup
         self.setWindowTitle("Disneyland Audio Manager")
-        self.setGeometry(100, 100, 420, 450)
+        self.setGeometry(100, 100, 500, 550)
+        self.setWindowIcon(QIcon("assets/icon.ico"))  # Optional: Set an icon
 
         # Main Layout
         self.layout = QVBoxLayout()
@@ -36,6 +35,26 @@ class AudioManagerGUI(QWidget):
         self.divider.setFrameShape(QFrame.Shape.HLine)
         self.divider.setFrameShadow(QFrame.Shadow.Sunken)
         self.layout.addWidget(self.divider)
+
+        # Add Spacing
+        self.layout.addSpacing(10)
+
+        # Output Console
+        self.output_console = QTextEdit(self)
+        self.output_console.setReadOnly(True)
+        self.output_console.setFont(QFont("Consolas", 10))
+        self.output_console.setMaximumHeight(250)  # Restrict console height
+        self.output_console.setStyleSheet("""
+            background-color: #181818;
+            color: #E0E0E0;
+            font-family: Consolas, Courier, monospace;
+            padding: 8px;
+            border-radius: 5px;
+        """)
+        self.layout.addWidget(self.output_console)
+
+        # Add Spacing
+        self.layout.addSpacing(15)
 
         # Button Style
         self.button_style = """
@@ -65,6 +84,10 @@ class AudioManagerGUI(QWidget):
             ("Remove Holiday Tracks", "remove_holiday_tracks.py"),
         ]
 
+        # Button Layout
+        self.button_layout = QVBoxLayout()
+        self.button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         # Create Buttons
         self.buttons = []
         for text, script in scripts:
@@ -73,8 +96,10 @@ class AudioManagerGUI(QWidget):
             btn.setFont(QFont("Arial", 12))
             btn.setFixedSize(320, 40)
             btn.clicked.connect(lambda checked, s=script: self.run_script(s))
-            self.layout.addWidget(btn)
+            self.button_layout.addWidget(btn)
             self.buttons.append(btn)
+
+        self.layout.addLayout(self.button_layout)  # Add buttons as a separate layout
 
         # Centered Theme Toggle Switch
         self.toggle_layout = QHBoxLayout()
@@ -83,7 +108,6 @@ class AudioManagerGUI(QWidget):
         self.theme_toggle.setChecked(True)  # Start in Dark Mode
         self.theme_toggle.setStyleSheet("padding: 10px;")
         self.theme_toggle.stateChanged.connect(self.toggle_theme)
-
         self.toggle_layout.addWidget(self.theme_toggle, alignment=Qt.AlignmentFlag.AlignCenter)
         self.layout.addLayout(self.toggle_layout)
 
@@ -93,9 +117,39 @@ class AudioManagerGUI(QWidget):
         self.setLayout(self.layout)
 
     def run_script(self, script):
-        """Runs the selected script in a new CMD window."""
-        script_path = os.path.join(os.getcwd(), script)
-        subprocess.Popen(["python", script_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+        """Runs the selected script within the application and captures output."""
+        
+        if getattr(sys, 'frozen', False):  # ✅ Now correctly indented inside the function
+            base_path = os.path.join(sys._MEIPASS, "scripts")  # Extracted scripts directory
+        else:
+            base_path = os.path.join(os.getcwd(), "scripts")  # Running from source
+
+        script_path = os.path.join(base_path, script)
+
+        if not os.path.exists(script_path):
+            self.output_console.append(f"Error: Script '{script}' not found!")
+            return  # ✅ Now correctly inside the function
+
+        self.process.setProgram("python")
+        self.process.setArguments([script_path])
+        self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+        self.process.readyReadStandardOutput.connect(self.read_output)
+        self.process.readyReadStandardError.connect(self.read_output)
+        self.process.finished.connect(lambda: self.output_console.append("Task completed!\n"))
+        self.process.start()
+
+    def read_output(self):
+        """Reads output from the running script and displays it in the console."""
+        output = self.process.readAllStandardOutput().data().decode()
+        error = self.process.readAllStandardError().data().decode()
+        
+        if output.strip():
+            self.output_console.append(output.strip())
+        if error.strip():
+            self.output_console.append(f"<span style='color:red;'>{error.strip()}</span>")
+        
+        # Auto-scroll to the bottom
+        self.output_console.verticalScrollBar().setValue(self.output_console.verticalScrollBar().maximum())
 
     def toggle_theme(self):
         """Switches between Dark and Light mode based on toggle state."""
@@ -103,6 +157,7 @@ class AudioManagerGUI(QWidget):
             self.set_dark_mode()
         else:
             self.set_light_mode()
+
 
     def set_dark_mode(self):
         """Applies Dark Mode Theme."""
