@@ -35,4 +35,4 @@ def remove_unwanted_tracks():
 
 if __name__ == "__main__":
     remove_unwanted_tracks()
-input("\nTask completed! Press Enter to exit...")
+print("Task completed!")
