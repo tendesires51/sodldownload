@@ -15,21 +15,25 @@ A collection of Python scripts for **downloading, organizing, and managing Sound
 
 ## 🛠 Installation
 
-### **1️⃣ Install Dependencies**
-Make sure you have Python **3.10+** installed. Then install all required packages:
+### **1️⃣ Download the Executable (No Python Required)**
+If you don’t want to install Python or dependencies, **download the standalone executable** from the [Releases](https://github.com/tendesires51/sodldownload/releases) tab.
+
+- No installation needed—just download and extract `AudioManager.zip`. (Comes pre-bundled with album art to save time)
+
+### **2️⃣ Install via Python (Advanced Users)**
+If you prefer running the scripts manually download or clone the repo and install the dependencies:
 
 `
 pip install -r requirements.txt
 `
 
-### **2️⃣ Run the GUI**
-To use the graphical interface, simply run:
+Then run the GUI:
 
 `
 python gui.py
 `
 
-Alternatively, you can execute any script manually, e.g.:
+Or execute any script manually, e.g.:
 
 `
 python download_songs.py
