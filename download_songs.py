@@ -187,4 +187,4 @@ if __name__ == "__main__":
                 for future in futures:
                     future.result()
 
-input("\nTask completed! Press Enter to exit...")
+print("Task completed!")
