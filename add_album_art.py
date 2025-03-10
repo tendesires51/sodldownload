@@ -130,4 +130,4 @@ if __name__ == "__main__":
         download_album_art(album_map)
         embed_album_art()
         print("Album art processing complete!")
-input("\nTask completed! Press Enter to exit...")
+print("Task completed!")
