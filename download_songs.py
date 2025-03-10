@@ -2,6 +2,7 @@ import os
 import requests
 import shutil
 import threading
+import time
 from urllib.parse import unquote
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
@@ -20,6 +21,14 @@ os.makedirs(BASE_DIR, exist_ok=True)
 # Lock for progress bar updates
 lock = threading.Lock()
 
+### Logging Function ###
+def log_message(message):
+    """Logs messages persistently in log.txt and prints using tqdm.write()."""
+    timestamp = time.strftime("[%Y-%m-%d %H:%M:%S]")
+    with open("log.txt", "a", encoding="utf-8") as log_file:
+        log_file.write(f"{timestamp} {message}\n")
+    tqdm.write(message)  # Ensures the message does not interfere with the progress bar
+
 ### 1️⃣ Download and Process a Single File ###
 def download_and_process(url, album, progress_bar):
     """Downloads a song, converts it if needed, and ensures it's in the correct folder."""
@@ -30,33 +39,38 @@ def download_and_process(url, album, progress_bar):
     file_path = os.path.join(album_folder, filename)
 
     if os.path.exists(file_path):
-        with lock:
-            tqdm.write(f"Already downloaded: {file_path}")
-            progress_bar.update(1)
+        log_message(f"Already downloaded: {filename}")
+        progress_bar.update(1)
         return
 
-    with lock:
-        tqdm.write(f"Downloading: {url}")
+    start_time = time.time()
+    log_message(f"Downloading: {filename}")
 
     response = requests.get(url, stream=True)
+    file_size = 0
     if response.status_code == 200:
         with open(file_path, "wb") as file:
             for chunk in response.iter_content(1024):
                 file.write(chunk)
+                file_size += len(chunk)
 
-        with lock:
-            tqdm.write(f"Saved: {file_path}")
+    end_time = time.time()
+    log_message(f"Saved: {filename} ({file_size / 1024:.2f} KB) in {end_time - start_time:.2f} sec")
 
-        # Convert if necessary
-        if file_path.lower().endswith(".m4a"):
-            file_path = convert_m4a_to_mp3(file_path)
+    # Conversion Timing
+    if file_path.lower().endswith(".m4a"):
+        conv_start = time.time()
+        file_path = convert_m4a_to_mp3(file_path)
+        conv_end = time.time()
+        log_message(f"Converted: {filename} in {conv_end - conv_start:.2f} sec")
 
-        # Move if needed
-        if file_path:
-            move_file_by_metadata(file_path)
+    # Metadata Processing Timing
+    meta_start = time.time()
+    move_file_by_metadata(file_path)
+    meta_end = time.time()
+    log_message(f"Processed metadata for {filename} in {meta_end - meta_start:.2f} sec")
 
-    with lock:
-        progress_bar.update(1)
+    progress_bar.update(1)
 
 ### 2️⃣ Convert M4A to MP3 ###
 def convert_m4a_to_mp3(file_path):
@@ -79,17 +93,13 @@ def convert_m4a_to_mp3(file_path):
         if "\xa9day" in tags: mp3_tags["TDRC"] = TDRC(encoding=3, text=tags["\xa9day"][0])
 
         mp3_tags.save(mp3_path)
-
         os.remove(file_path)
-        with lock:
-            tqdm.write(f"Converted: {file_path} → {mp3_path}")
         return mp3_path
     except Exception as e:
-        with lock:
-            tqdm.write(f"Error converting {file_path}: {e}")
+        log_message(f"Error converting {file_path}: {e}")
         return file_path  
 
-### 3️⃣ Get Album Metadata ###
+### Get Album Metadata ###
 def get_album_metadata(file_path):
     """Extracts album metadata from an MP3 file."""
     try:
@@ -112,8 +122,7 @@ def move_file_by_metadata(file_path):
         if os.path.basename(current_folder) != os.path.basename(album_folder):
             new_path = os.path.join(album_folder, os.path.basename(file_path))
             shutil.move(file_path, new_path)
-            with lock:
-                tqdm.write(f"Moved: {os.path.basename(file_path)} → {album_name}/")
+            log_message(f"Moved: {os.path.basename(file_path)} -> {album_name}/")
             return new_path
 
     return file_path  
@@ -164,19 +173,18 @@ def sanitize_filename(name):
 
     return base + ext
 
-### 🚀 Run Everything 🚀 ###
+### Run Everything ###
 if __name__ == "__main__":
     mp3_files = fetch_album_data()
 
     if mp3_files:
-        print(f"Downloading {len(mp3_files)} songs...\n")
-        
+        log_message(f"Downloading {len(mp3_files)} songs...\n")
+
         # Initialize tqdm progress bar
         with tqdm(total=len(mp3_files), desc="Downloading Songs", unit="song", leave=True) as progress_bar:
-            # Use ThreadPoolExecutor to download multiple songs at once
-            with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust workers as needed
+            with ThreadPoolExecutor(max_workers=25) as executor:
                 futures = [executor.submit(download_and_process, mp3_url, album_name, progress_bar) for mp3_url, album_name in mp3_files]
                 for future in futures:
-                    future.result()  # Wait for all downloads to finish
+                    future.result()
 
-    print("\nAll tasks completed! 🎵")
+input("\nTask completed! Press Enter to exit...")
