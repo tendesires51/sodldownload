@@ -30,12 +30,13 @@ def set_album_artist(mp3_file):
 
         audio.tags.add(TPE2(encoding=3, text="Disney"))
         audio.save()
-        tqdm.write(f"✔ Updated: {mp3_file}")
+        tqdm.write(f"Updated: {mp3_file}")
     except Exception as e:
-        tqdm.write(f"❌ Error updating {mp3_file}: {e}")
+        tqdm.write(f"Error updating {mp3_file}: {e}")
 
-### 🚀 Run Everything 🚀 ###
+### Run Everything ###
 if __name__ == "__main__":
-    print("🎵 Updating all MP3 files with Album Artist: Disney...")
+    print("Updating all MP3 files with Album Artist: Disney...")
     update_album_artist()
-    print("\n✅ All files updated!")
+    print("\nAll files updated!")
+input("\nTask completed! Press Enter to exit...")
