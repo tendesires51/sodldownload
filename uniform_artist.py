@@ -39,4 +39,4 @@ if __name__ == "__main__":
     print("Updating all MP3 files with Album Artist: Disney...")
     update_album_artist()
     print("\nAll files updated!")
-input("\nTask completed! Press Enter to exit...")
+print("Task completed!")
