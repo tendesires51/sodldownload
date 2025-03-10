@@ -15,13 +15,13 @@ def sanitize_filename(name):
 
 def fetch_album_data():
     """Scrape album data from the JavaScript file to extract album-art mappings."""
-    print("🔍 Fetching album data...")
+    print("Fetching album data...")
     album_map = {}
 
     try:
         response = requests.get(ALBUM_DATA_URL)
         if response.status_code != 200:
-            print("❌ Failed to fetch album data!")
+            print("Failed to fetch album data!")
             return {}
 
         # Extract JSON-like album data from JavaScript
@@ -32,9 +32,9 @@ def fetch_album_data():
             safe_album = sanitize_filename(album)
             album_map[safe_album] = poster.replace("AlbumArt/", "")
 
-        print(f"✅ Found {len(album_map)} album-art mappings.")
+        print(f"Found {len(album_map)} album-art mappings.")
     except Exception as e:
-        print(f"❌ Error fetching album data: {e}")
+        print(f"Error fetching album data: {e}")
 
     return album_map
 
@@ -46,7 +46,7 @@ def download_album_art(album_map):
         safe_album = sanitize_filename(album)
         image_filename = os.path.join(ALBUM_ART_DIR, f"{safe_album}.jpg")
 
-        print(f"🖼️ Saving {image_filename} for album: {album}")  # Debugging print
+        print(f"Saving {image_filename} for album: {album}")  # Debugging print
 
         # Check if image already exists
         if os.path.exists(image_filename):
@@ -58,11 +58,11 @@ def download_album_art(album_map):
             if response.status_code == 200:
                 with open(image_filename, "wb") as img_file:
                     img_file.write(response.content)
-                print(f"✔ Downloaded album art: {image_filename}")
+                print(f"Downloaded album art: {image_filename}")
             else:
-                print(f"❌ Failed to download: {art_filename}")
+                print(f"Failed to download: {art_filename}")
         except Exception as e:
-            print(f"❌ Error downloading {art_filename}: {e}")
+            print(f"Error downloading {art_filename}: {e}")
 
 def remove_existing_album_art(mp3_path):
     """Removes all embedded album art (APIC tags) from an MP3 file."""
@@ -76,10 +76,10 @@ def remove_existing_album_art(mp3_path):
             for key in apic_keys:
                 del audio.tags[key]
             audio.save()
-            print(f"🗑 Removed existing album art from {mp3_path}")
+            print(f"Removed existing album art from {mp3_path}")
 
     except Exception as e:
-        print(f"❌ Error removing album art from {mp3_path}: {e}")
+        print(f"Error removing album art from {mp3_path}: {e}")
 
 def embed_album_art():
     """Remove old album art and embed new album art into MP3 files based on album folder names."""
@@ -93,7 +93,7 @@ def embed_album_art():
         image_path = os.path.join(ALBUM_ART_DIR, f"{safe_album}.jpg")
 
         if not os.path.exists(image_path):
-            print(f"⚠ No album art found for {folder}")
+            print(f"No album art found for {folder}")
             continue
 
         for file in os.listdir(folder_path):
@@ -119,14 +119,15 @@ def embed_album_art():
                         ))
                     
                     audio.save()
-                    print(f"✔ Embedded album art into {file_path}")
+                    print(f"Embedded album art into {file_path}")
 
                 except Exception as e:
-                    print(f"❌ Error embedding art for {file}: {e}")
+                    print(f"Error embedding art for {file}: {e}")
 
 if __name__ == "__main__":
     album_map = fetch_album_data()
     if album_map:
         download_album_art(album_map)
         embed_album_art()
-        print("✅ Album art processing complete!")
+        print("Album art processing complete!")
+input("\nTask completed! Press Enter to exit...")
