@@ -9,7 +9,7 @@ BASE_DIR = "E:\\Disneyland\\Disneyland_Audio"
 ALBUMS_TO_REMOVE = ["Holiday", "Haunted Mansion Holiday"]
 
 def remove_unwanted_tracks():
-    print("🔍 Scanning for Holiday tracks...")
+    print("Scanning for Holiday tracks...")
 
     for folder in os.listdir(BASE_DIR):
         folder_path = os.path.join(BASE_DIR, folder)
@@ -25,13 +25,14 @@ def remove_unwanted_tracks():
                     album = audio.tags.get("TALB", ["Unknown"])[0]
 
                     if album in ALBUMS_TO_REMOVE:
-                        print(f"🗑 Deleting: {file} (Album: {album})")
+                        print(f"Deleting: {file} (Album: {album})")
                         os.remove(file_path)
                 
                 except Exception as e:
-                    print(f"⚠️ Error reading {file}: {e}")
+                    print(f"Error reading {file}: {e}")
 
-    print("✅ Cleanup complete!")
+    print("Cleanup complete!")
 
 if __name__ == "__main__":
     remove_unwanted_tracks()
+input("\nTask completed! Press Enter to exit...")
