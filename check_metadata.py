@@ -46,4 +46,4 @@ def check_metadata():
 if __name__ == "__main__":
     print("Checking metadata...")
     check_metadata()
-input("\nTask completed! Press Enter to exit...")
+print("Task completed!")
