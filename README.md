@@ -1,111 +1,66 @@
-# Sounds of Disneyland - Automated Download & Metadata Fixing
+# Sounds of Disneyland Audio Manager
 
-This collection of scripts downloads, organizes, and fixes metadata for all tracks from Sounds of Disneyland.  
-Follow the steps below in the correct order to ensure everything works properly.
+A collection of Python scripts for **downloading, organizing, and managing Sounds of Disneyland audio files**. This project automates tasks such as **downloading songs, fixing metadata, organizing files, and adding album art**.
 
----
-
-## 0. PREREQUISITES (Install Before Running)
-- Install **Python** (latest version)
-- Install required Python libraries:  
-  ```
-  pip install -r requirements.txt
-  ```
-- Install **FFmpeg** and add it to your system **PATH**:  
-  1. Download from [FFmpeg Builds](https://www.gyan.dev/ffmpeg/builds/)
-  2. Extract and copy the `"bin"` folder path (e.g., `C:\ffmpeg\bin`)
-  3. Add it to your system **PATH** environment variable  
-
-- Ensure a **stable internet connection** (scripts download a large number of files)
+## 🚀 Features
+- **Download Songs**: Fetches Disneyland music files from the web.
+- **Check Metadata**: Scans MP3 files for missing or incorrect metadata.
+- **Fix Metadata**: Automatically corrects metadata and moves files to the right folders.
+- **Uniform Artist**: Standardizes artist names for consistency.
+- **Add Album Art**: Inserts album covers into MP3 files.
+- **Remove Holiday Tracks**: Deletes seasonal tracks from your collection.
+- **Modern PyQt6 GUI**: A sleek **Graphical User Interface** (GUI) to easily run these scripts.
 
 ---
 
-## 1. DOWNLOAD SONGS
-**Run:**  
-```
+## 🛠 Installation
+
+### **1️⃣ Install Dependencies**
+Make sure you have Python **3.10+** installed. Then install all required packages:
+
+`
+pip install -r requirements.txt
+`
+
+### **2️⃣ Run the GUI**
+To use the graphical interface, simply run:
+
+`
+python gui.py
+`
+
+Alternatively, you can execute any script manually, e.g.:
+
+`
 python download_songs.py
-```
-**What it does:**  
-- Fetches album data from the website  
-- Downloads all MP3/M4A files  
-- Converts M4A to MP3 automatically  
-- Organizes files into correct album folders  
+`
 
 ---
 
-## 2. CHECK METADATA
-**Run:**  
-```
-python check_metadata.py
-```
-**What it does:**  
-- Scans all downloaded MP3 files  
-- Lists missing or incorrect metadata fields  
-- Ensures files have correct album and artist tags  
+## 📂 Scripts Overview
+
+### **1️⃣ Download Songs (`download_songs.py`)**
+- Fetches and saves Disneyland audio files.
+- Converts `.m4a` files to `.mp3` if needed.
+- Moves tracks to the correct folders based on metadata.
+
+### **2️⃣ Check Metadata (`check_metadata.py`)**
+- Scans all MP3 files.
+- Detects **missing album names, track numbers, or incorrect metadata**.
+
+### **3️⃣ Fix Metadata (`fix_metadata.py`)**
+- Corrects missing metadata tags (Title, Artist, Album, etc.).
+- Moves files into the correct album folder based on their metadata.
+
+### **4️⃣ Uniform Artist (`uniform_artist.py`)**
+- Ensures all artist names are consistent.
+
+### **5️⃣ Add Album Art (`add_album_art.py`)**
+- Inserts album covers into MP3 files.
+- Uses existing images or downloads them automatically.
+
+### **6️⃣ Remove Holiday Tracks (`remove_holiday_tracks.py`)**
+- Finds and deletes **seasonal** tracks because they have weird metadata issues.
+- Helps keep your collection clean.
 
 ---
-
-## 3. FIX METADATA
-**Run:**  
-```
-python fix_metadata.py
-```
-**What it does:**  
-- Fills in missing metadata fields (title, album, track number, etc.)  
-- Ensures all tags are properly formatted  
-- Prevents issues with blank metadata in media players  
-
----
-
-## 4. UNIFORM ARTIST FIELD
-**Run:**  
-```
-python uniform_artist.py
-```
-**What it does:**  
-- Updates the **"ALBUM ARTIST"** field for all songs to **"Disney"**  
-- Preserves the individual **"ARTIST"** field for composers  
-- Ensures consistency across all tracks  
-
----
-
-## 5. ADD ALBUM ART
-**Run:**  
-```
-python add_album_art.py
-```
-**What it does:**  
-- Fetches correct album art based on website data  
-- Downloads and organizes album covers  
-- Removes any existing (incorrect) album art  
-- Embeds the correct album art into each MP3 file  
-
----
-
-## 6. CHECK METADATA AGAIN
-**Run:**  
-```
-python check_metadata.py
-```
-**What it does:**  
-- Verifies all metadata is now correctly formatted  
-- Confirms that album art is properly embedded  
-- Ensures no tracks are missing important tags  
-
----
-
-## 7. (OPTIONAL) REMOVE HOLIDAY ALBUMS
-**Run:**  
-```
-python remove_holiday_tracks.py
-```
-**What it does:**  
-- The albums **"Holiday"** and **"Haunted Mansion Holiday"** are incorrectly formatted in the source data  
-- This causes some tracks to be mislabeled, affecting their organization  
-- If you prefer, this script will **remove all tracks** from these albums  
-- Only use this if you do not want these albums in your collection  
-
----
-
-## ALL DONE!  
-At this point, all songs should be **fully organized, properly tagged, and ready for use** in any media player.
